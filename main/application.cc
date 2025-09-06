@@ -6,6 +6,7 @@
 #include "font_awesome_symbols.h"
 #include "mcp_server.h"
 #include "mqtt_protocol.h"
+#include "server_config.h"
 #include "settings.h"
 #include "system_info.h"
 #include "websocket_protocol.h"
@@ -480,6 +481,10 @@ void Application::Start()
     // Check for new firmware version or get the MQTT broker address
     Ota ota;
     CheckNewVersion(ota);
+
+    // Initialize server configuration after network is ready
+    ESP_LOGI(TAG, "Initializing server configuration...");
+    ServerConfig::GetInstance().Initialize();
 
     // Initialize the protocol
     display->SetStatus(Lang::Strings::LOADING_PROTOCOL);
@@ -1263,7 +1268,7 @@ void Application::UploadCameraImage(Camera *camera)
 
     // 构造multipart/form-data请求体
     std::string boundary = "----ESP32_CAMERA_BOUNDARY";
-    std::string server_url = "http://8.138.251.153:8003/upload";
+    std::string server_url = ServerConfig::GetInstance().GetUploadServerUrl();
 
     // 生成带时间戳的文件名
     auto now = std::time(nullptr);
@@ -1419,7 +1424,7 @@ void Application::ShowRegistrationPrompt()
     }
 
     // 构造注册提示信息
-    std::string registration_message = "请访问 http://8.138.251.153:8001/ 进行身份注册\n设备ID: " + device_id;
+    std::string registration_message = "请访问 " + ServerConfig::GetInstance().GetRegistrationServerUrl() + " 进行身份注册\n设备ID: " + device_id;
 
     ESP_LOGI(TAG, "Showing registration prompt - Device ID: %s", device_id.c_str());
 
@@ -1617,7 +1622,7 @@ void Application::SendInspectionRequest()
     http->SetHeader("Content-Type", "application/json");
     http->SetContent(std::move(json_body));
 
-    std::string server_url = "http://8.138.251.153:8003/xiaozhi/push/message";
+    std::string server_url = ServerConfig::GetInstance().GetInspectionServerUrl();
 
     ESP_LOGI(TAG, "Sending POST request to: %s", server_url.c_str());
     ESP_LOGI(TAG, "Device ID: %s", device_id.c_str());

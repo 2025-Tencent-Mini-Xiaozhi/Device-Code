@@ -1613,7 +1613,6 @@ void Application::SendInspectionRequest()
                             device_id +
                             "\", "
                             "\"message\": \"进行集群巡检\", "
-                            "\"auth_key\": \"3b039beb-90fa-4170-bed2-e0e146126877\", "
                             "\"bypass_llm\": false, "
                             "\"notification_type\": \"info\""
                             "}";
